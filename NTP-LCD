@@ -1,0 +1,48 @@
+/*
+
+ Example guide: https://www.amebaiot.com/en/amebapro2-arduino-ntpclient/
+ */
+
+#include <NTPClient.h>
+#include <WiFi.h>
+#include <WiFiUdp.h>
+#include <LiquidCrystal_PCF8574.h>
+LiquidCrystal_PCF8574 lcd(0x27);
+
+char ssid[] = "wifi ssid name";
+char pass[] = "wifi password";
+
+WiFiUDP ntpUDP;
+
+// You can specify the time server pool and the offset (in seconds, can be
+// changed later with setTimeOffset() ). Additionally you can specify the
+// update interval (in milliseconds, can be changed using setUpdateInterval() ).
+NTPClient timeClient(ntpUDP, "tock.stdtime.gov.tw", 28800, 10000);
+
+void setup()
+{
+    Serial.begin(115200);
+
+    WiFi.begin(ssid, pass);
+
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+    }
+    timeClient.begin();
+    lcd.begin(16, 2);
+    lcd.setBacklight(255);
+    lcd.clear();
+}
+
+void loop()
+{
+    timeClient.update();
+    for (int i = 4; i > 3; i--)
+    {
+      lcd.setCursor(i-1, 0);
+      lcd.print(timeClient.getFormattedTime());
+      delay(10);
+    }
+    delay(900);
+}
